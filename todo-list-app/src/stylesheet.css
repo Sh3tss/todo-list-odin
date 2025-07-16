@@ -131,6 +131,9 @@
     padding: 20px;
     margin-bottom: 20px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    overflow: hidden; 
+    padding-bottom: 50px; 
+    position: relative; 
 }
 .project-card h2 {
     color: #333;
@@ -169,4 +172,19 @@
     font-style: italic;
     text-align: center;
     padding: 20px;
+}
+.add-task-btn {
+    padding: 8px 15px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.9em;
+    margin-top: 15px;
+    transition: background-color 0.2s ease-in-out;
+    float: right; 
+}
+.add-task-btn:hover {
+    background-color: #0056b3;
 }

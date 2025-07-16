@@ -46,4 +46,4 @@ const loadData = () => {
         return [];
     }
 };
-export {saveData, loadData};
+export {saveData, loadData };
