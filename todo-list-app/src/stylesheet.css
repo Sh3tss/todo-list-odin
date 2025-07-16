@@ -1,0 +1,172 @@
+#content {
+    display: flex;
+    height: 100vh; 
+}
+#sideBar-menu {
+    width: 250px; 
+    background-color: #f0f0f0;
+    padding: 20px;
+    box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+    flex-shrink: 0; 
+}
+#main-content-area {
+    flex-grow: 1;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+}
+#project-bar {
+    margin-bottom: 20px;
+}
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    opacity: 1;
+    transition: opacity 0.3s ease-in-out;
+}
+.modal-overlay.hidden {
+    display: none; 
+    opacity: 0;
+    pointer-events: none; 
+}
+.modal-content {
+    background-color: white;
+    padding: 25px;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    width: 90%;
+    max-width: 550px;
+    transform: translateY(0); 
+    transition: transform 0.3s ease-in-out;
+}
+.modal-overlay.hidden .modal-content {
+    transform: translateY(-20px); 
+}
+#new-project-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+#new-project-form label {
+    font-weight: bold;
+    color: #333;
+}
+#new-project-form input[type="text"],
+#new-project-form input[type="date"] {
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 1em;
+}
+.modal-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 25px;
+}
+.modal-buttons button {
+    padding: 12px 25px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1.05em;
+    font-weight: bold;
+    transition: background-color 0.2s ease-in-out;
+}
+#createProjectbtn {
+    background-color: #28a745;
+    color: white;
+}
+#createProjectbtn:hover {
+    background-color: #218838;
+}
+#cancelProjectbtn {
+    background-color: #6c757d; 
+    color: white;
+}
+#cancelProjectbtn:hover {
+    background-color: #5a6268;
+}
+.menubtn {
+    display: block; 
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 8px;
+    border: none;
+    background-color: #e2e6ea;
+    border-radius: 5px;
+    text-align: left;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+.menubtn:hover {
+    background-color: #d3d7db;
+}
+.page-button {
+    padding: 12px 25px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1.1em;
+    font-weight: bold;
+    transition: background-color 0.2s;
+}
+.page-button:hover {
+    background-color: #0056b3;
+}
+.project-card {
+    background-color: #ffffff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+.project-card h2 {
+    color: #333;
+    margin-top: 0;
+    margin-bottom: 15px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+}
+.project-todos-list {
+    list-style: none; 
+    padding: 0;
+    margin-top: 15px;
+}
+.todo-item {
+    background-color: #f8f9fa;
+    border: 1px solid #e9ecef;
+    padding: 10px 15px;
+    margin-bottom: 8px;
+    border-radius: 5px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.95em;
+}
+.todo-item.completed {
+    text-decoration: line-through;
+    color: #6c757d;
+    background-color: #e9ecef;
+}
+.no-todos-message {
+    color: #888;
+    font-style: italic;
+}
+.no-projects-message {
+    color: #888;
+    font-style: italic;
+    text-align: center;
+    padding: 20px;
+}

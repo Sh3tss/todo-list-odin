@@ -71,6 +71,48 @@ const projectButton = () => {
 
     return pagebutton;
 };
+const modalProject = () => {
+    const modalContainer = document.getElementById("project-modal-overlay");
+    if (!modalContainer) {
+        console.error("Element with ID 'project-modal-overlay' not found in the dom");
+        return;
+    }
+    const createProjectModalBtn = document.getElementById("createProjectbtn");
+    if (!createProjectModalBtn) {
+        console.error("Element with id 'createprojectbtn' not found");
+        return;
+    }
+    createProjectModalBtn.addEventListener('click', () => {
+        alert("teste botao criar");
+    });
+    const cancelProjectModalBtn = document.getElementById("cancelProjectbtn");
+    if(cancelProjectModalBtn){
+        console.error("Element with id 'cancelprojectbtn' not found");
+        return;
+    }
+    cancelProjectModalBtn.addEventListener('click', () => {
+        alert("cancel clicado");
+        hideProjectModal();
+    });
+};
+const showProjectModal = () =>{
+    const appearModalProject = document.getElementById("project-modal-overlay");
+    if(appearModalProject){
+        appearModalProject.classList.remove("hidden"); 
+    }else {
+        console.error("Modal overlay not found to show");
+    }
+};
+const hideProjectModal = () =>{
+    const hiddenModalProject = document.getElementById("project-modal-overlay");
+    if(hiddenModalProject){
+        hiddenModalProject.classList.add("hidden");
+    } else{
+        console.error("modal overlay not found to hide");
+    }
+    
+};
+
 const projectPage = (projects) => {
     const pageContainer = document.getElementById("project-page");
     if (pageContainer) {
@@ -121,4 +163,4 @@ const projectPage = (projects) => {
         console.error("Element with ID 'project-page' not found in the DOM.");
     }
 };
-export {sideBar, projectPage, projectButton};
+export {sideBar, projectPage, projectButton, hideProjectModal, showProjectModal, modalProject};

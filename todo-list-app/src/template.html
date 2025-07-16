@@ -4,8 +4,29 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>To-Do App</title>
+    <link rel = "stylesheet" src = "./stylesheet.css"
 </head>
 <body>
+    <div id = "project-modal-overlay" class = "modal-overlay hidden">
+        <div id = "project-form-modal" class = "modal-content">
+            <h2>New Project</h2>
+            <form id = "new-project-form">
+                <label for = "project-name">Project Name:</label>
+                <input type = "text" id = "project-name" name = "project-name" required>
+
+                <label for = "start-date">Start Date:</label>
+                <input type = "date" id = "start-date" name = "start-date">
+
+                <label for = "final-date">Final Date:</label>
+                <input type = "date" id = "final-date" name = "final-date">
+
+                <div class = "modal-buttons">
+                    <button type = "submit" id = "createProjectbtn">Create Project</button>
+                    <button type = "button" id = "cancelProjectbtn">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
     <div id = "content">
         <div id = "sideBar-menu">
 

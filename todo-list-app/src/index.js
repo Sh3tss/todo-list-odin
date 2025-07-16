@@ -1,6 +1,6 @@
 import { Project } from "./project";
 import { Todo } from "./todo";
-import { sideBar, projectPage, projectButton } from "./uiController";
+import { sideBar, projectPage, projectButton,hideProjectModal, showProjectModal, modalProject} from "./uiController";
 import { addProject, addTodoToProject, allProjects } from "./projectController";
 
 
@@ -11,8 +11,17 @@ if (allProjects.length === 0) {
 console.log("Projects loaded/initialized:", allProjects);
 
 sideBar();
-projectButton();
-
+const newProjBtn = projectButton();
 
 projectPage(allProjects);
+
+if (newProjBtn) {
+    newProjBtn.addEventListener('click', () => {
+        showProjectModal();
+    });
+} else {
+    console.error("button doesn't exist");
+}
+modalProject();
+
 
