@@ -12,6 +12,13 @@ if(allProjects.length === 0){
 const getProjectbyName = (projectName) =>{
     return allProjects.find(project => project.name === projectName);
 };
+const getTodoByProjectAndTitle = (projectName, todoTitle) => {
+    const project = getProjectbyName(projectName);
+    if(project && project.todos){
+        return project.todos.find(todo => todo.title === todoTitle);
+    }
+    return null;
+}
 
 const updateProject = (originalName, newName, newStartDate = "", newFinalDate = "") => {
     const projectIndex = allProjects.findIndex(project => project.name === originalName);
@@ -29,7 +36,48 @@ const updateProject = (originalName, newName, newStartDate = "", newFinalDate = 
         return false;
     }
 };
+const updateTodo = (projectName, originalTodoTitle, newTitle, newDescription, newDueDate, newPriority) => {
+    const project = getProjectbyName(projectName);
+    
+    if(project && project.todos){
+        const todoIndex = project.todos.findIndex(todo => todo.title === originalTodoTitle);
+        if(todoIndex !== -1){
+            project.todos[todoIndex].title = newTitle;
+            project.todos[todoIndex].description = newDescription;
+            project.todos[todoIndex].dueDate = newDueDate;
+            project.todos[todoIndex].priority = newPriority;
 
+            saveData(allProjects);
+            console.log(`task ${originalTodoTitle} inproject ${projectName} updated to ${newTitle}`);
+            return true;
+        }else {
+            console.error(`task ${originalTodoTitle} not found in project ${projectName}for update`);
+            return false;
+        }
+    }else {
+        console.error(`project ${projectName} not found or has no todos to update`);
+        return false; 
+    }
+};
+const toggleTodoCompletion = (projectName, todoTitle, isComplete) =>{
+    const project = getProjectbyName(projectName);
+
+    if(project && project.todos){
+        const todo = project.todos.find(t => t.title === todoTitle);
+        if(todo){
+            todo.isComplete = isComplete;
+            saveData(allProjects);
+            console.log(`Task ${todoTitle} in project ${projectName} masked as ${isComplete ? "Completed" : "Not Completed"}`);
+            return true;
+        } else{
+            console.log(`Error task ${todoTitle} not found in project ${projectName}`);
+            return false;
+        } 
+    }else {
+        console.error(`error project ${projectName} not found or doesn't have tasks to complete`);
+        return false;
+    }
+}
 
 
 const addProject = (projectName, startDate = "", finalDate = "") => {
@@ -50,4 +98,4 @@ const addTodoToProject = (projectName, title, description, dueDate, priority) =>
         console.error(`Project "${projectName}" not found to add the task`);
     }
 };
-export {allProjects, addProject, addTodoToProject, getProjectbyName, updateProject};
+export {allProjects, addProject, addTodoToProject, getProjectbyName, updateProject, getTodoByProjectAndTitle,updateTodo, toggleTodoCompletion};

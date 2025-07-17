@@ -188,3 +188,15 @@
 .add-task-btn:hover {
     background-color: #0056b3;
 }
+.todo-item.completed span { 
+    text-decoration: line-through;
+    color: #888; 
+}
+.complete-todo-checkbox {
+    margin-right: 8px; 
+    cursor: pointer; 
+    vertical-align: middle; 
+}
+.todo-item.completed {
+    opacity: 0.7; 
+}

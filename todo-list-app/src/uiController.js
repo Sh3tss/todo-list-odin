@@ -1,5 +1,5 @@
 import { addProject } from "./projectController";
-import { allProjects, addTodoToProject,getProjectbyName, updateProject} from "./projectController";
+import { allProjects, addTodoToProject,getProjectbyName, updateProject, getTodoByProjectAndTitle, updateTodo,toggleTodoCompletion} from "./projectController";
 
 const sideBar = () => {
     const sideContainer = document.getElementById("sideBar-menu");
@@ -285,9 +285,30 @@ const projectPage = (projects) => {
                         todoItem.textContent = `${todo.title} (Due: ${todo.dueDate})`;
                         todoItem.classList.add("todo-item");
 
+                        const completeCheckBox = document.createElement("input");
+                        completeCheckBox.type = "checkbox";
+                        completeCheckBox.classList.add("complete-todo-checkbox");
+                        completeCheckBox.checked = todo.isComplete;
+                        completeCheckBox.dataset.projectName = project.name;
+                        completeCheckBox.dataset.todoTitle = todo.title;
+
+                        todoItem.appendChild(completeCheckBox);
+
+                        const todoTextSpan = document.createElement("span");
+                        todoTextSpan.textContent = `${todo.title} (Due: ${todo.dueDate})`;
+                        todoItem.appendChild(todoTextSpan);
+
                         if (todo.isComplete) {
                             todoItem.classList.add('completed');
                         }
+
+                        const editTaskButton = document.createElement("button");
+                        editTaskButton.classList.add("edit-task-btn");
+                        editTaskButton.textContent = "Edit Task";
+                        editTaskButton.dataset.projectName = project.name;
+                        editTaskButton.dataset.todoTitle = todo.title;
+
+                        todoItem.appendChild(editTaskButton);
                         todosList.appendChild(todoItem);
                     });
                     projectElement.appendChild(todosList);
@@ -338,6 +359,16 @@ const setupListeners = () => {
             console.log("debug clicked on an element without classlist property");
             return;
         }
+        if(event.target.classList.contains("complete-todo-checkbox")) {
+            const projectName = event.target.dataset.projectName;
+            const todoTitle = event.target.dataset.todoTitle;
+            const isChecked = event.target.checked;
+
+            console.log(`checkbox clicked to the task ${todoTitle} inside project ${projectName} new statuts ${isChecked ? "Completed" : "Not Completed"}`);
+
+            toggleTodoCompletion(projectName, todoTitle, isChecked);
+            projectPage(allProjects);
+        }
         if(event.target.classList.contains("add-task-btn")) {
             const projectName = event.target.dataset.projectName;
             console.log(`Button Add task pressed for the project ${projectName}`);
@@ -347,6 +378,11 @@ const setupListeners = () => {
             const projectName = event.target.dataset.projectName;
             console.log(`button edit project pressed for the project ${projectName}`);
             showProjectModalForEdit(projectName);
+        }
+        if(event.target.classList.contains("edit-task-btn")){
+            const projectName = event.target.dataset.projectName;
+            const todoTitle = event.target.dataset.todoTitle;
+            showTaskModalForEdit(projectName, todoTitle);
         }
     };
     mainContentArea.addEventListener('click', dynamicClickListener);
@@ -368,53 +404,72 @@ const modalTask = () => {
     const submitTaskHandler = (event) => {
         event.preventDefault();
 
-        if (isSubmittingTask) { 
+        if (isSubmittingTask) {
             console.log("DEBUG: Task form already submitting. Ignoring second trigger.");
-            return; 
-        }
-        isSubmittingTask = true; 
-
-        const taskTitleInput = document.getElementById("task-title"); 
-        if (!taskTitleInput) {
-            console.error("Input 'task-title' not found in the DOM.");
-            isSubmittingTask = false; 
-            return; 
-        }
-        const title = taskTitleInput.value.trim();
-
-        console.log("DEBUG - title (after trim) in validate task:", title);
-
-        if (title === "") { 
-            alert("Task Title cannot be empty. Please enter a title.");
-            isSubmittingTask = false; 
             return;
         }
+        isSubmittingTask = true;
 
+        const taskModalForm = document.getElementById("new-task-form");
+        if (!taskModalForm) {
+            console.error("Form with id 'task-modal-form' not found.");
+            isSubmittingTask = false;
+            return;
+        }
+        const taskTitleInput = document.getElementById("task-title");
         const taskDescriptionInput = document.getElementById("task-description");
         const taskDueDateInput = document.getElementById("task-due-date");
         const taskPriorityInput = document.getElementById("task-priority");
-        const taskProjectNameInput = document.getElementById("task-project-name");
 
+        if (!taskTitleInput) {
+            console.error("Input 'task-title' not found in the DOM.");
+            isSubmittingTask = false;
+            return;
+        }
+
+        const title = taskTitleInput.value.trim();
         const description = taskDescriptionInput ? taskDescriptionInput.value.trim() : '';
         const dueDate = taskDueDateInput ? taskDueDateInput.value : '';
         const priority = taskPriorityInput ? taskPriorityInput.value : '';
-        const projectName = taskProjectNameInput ? taskProjectNameInput.value : '';
 
+        const projectNameForTask = taskModalForm.dataset.projectName; 
+        const originalProjectNameForEdit = taskModalForm.dataset.editingProjectName; 
+        const originalTodoTitle = taskModalForm.dataset.editingTodoTitle; 
 
-        if (projectName === "") { 
-            console.error("No project name found for task.");
-            alert("Error: Project not identified for task.");
-            isSubmittingTask = false; 
+        console.log("DEBUG - title (after trim) in validate task:", title);
+
+        if (title === "") {
+            alert("Task Title cannot be empty. Please enter a title.");
+            isSubmittingTask = false;
             return;
         }
-        addTodoToProject(projectName, title, description, dueDate, priority);
-        hideTaskModal();
-        newTaskForm.reset();
-        projectPage(allProjects);
-        console.log(`Task "${title}" added to project "${projectName}".`);
+        if (originalTodoTitle && originalProjectNameForEdit) { 
+            console.log(`DEBUG: Updating task "${originalTodoTitle}" in project "${originalProjectNameForEdit}" to new title "${title}".`);
+            updateTodo(originalProjectNameForEdit, originalTodoTitle, title, description, dueDate, priority);
+        } else {
+            console.log(`DEBUG: Creating new task "${title}" for project "${projectNameForTask}".`);
+            if (projectNameForTask === "") { 
+                console.error("No project name found for task creation.");
+                alert("Error: Project not identified for new task.");
+                isSubmittingTask = false;
+                return;
+            }
+            addTodoToProject(projectNameForTask, title, description, dueDate, priority);
+        }
 
-        isSubmittingTask = false; 
+        hideTaskModal();
+        taskModalForm.reset();
+
+        delete taskModalForm.dataset.editingProjectName;
+        delete taskModalForm.dataset.editingTodoTitle;
+        delete taskModalForm.dataset.projectName; 
+
+        projectPage(allProjects); 
+        console.log(`Task "${title}" process completed.`);
+
+        isSubmittingTask = false;
     };
+    
     if (newTaskForm._submitHandlerTask) { 
         newTaskForm.removeEventListener('submit', newTaskForm._submitHandlerTask);
         console.log("DEBUG: Removed old task form submit listener.");
@@ -442,15 +497,27 @@ const modalTask = () => {
 };
 
 const showTaskModal = (projectName) => {
-    const appearModalTask = document.getElementById("task-modal-overlay");
-    if(appearModalTask){
-        const taskProjectNameInput = document.getElementById("task-project-name");
-        if (taskProjectNameInput){
-            taskProjectNameInput.value = projectName;
+    const taskModalOverlay = document.getElementById("task-modal-overlay");
+    if (taskModalOverlay) {
+        const taskModalForm = document.getElementById("new-task-form");
+        const taskModalTitle = document.getElementById("task-modal-title");
+        const submitTaskButton = document.getElementById("createTaskBtn");
+
+        if (taskModalTitle) taskModalTitle.textContent = "Create New Task";
+        if (submitTaskButton) submitTaskButton.textContent = "Create Task";
+        if (taskModalForm) {
+            taskModalForm.reset(); 
+        
+            delete taskModalForm.dataset.editingProjectName;                                       
+            delete taskModalForm.dataset.editingTodoTitle;
         }
-        appearModalTask.classList.remove("hidden");
-    } else{
-        console.error("task modal overlay not found to show");
+
+        if (taskModalForm) {
+            taskModalForm.dataset.projectName = projectName;
+        }
+        taskModalOverlay.classList.remove("hidden");
+    } else {
+        console.error("Task modal overlay not found to show.");
     }
 };
 const hideTaskModal = () =>{
@@ -465,4 +532,47 @@ const hideTaskModal = () =>{
         console.error("task modal overlay not found to hide"); 
     }
 };
-export {sideBar, projectPage, projectButton, hideProjectModal, showProjectModal, modalProject, setupListeners, modalTask, showTaskModal, hideTaskModal};
+const showTaskModalForEdit = (projectName, todoTitle) => {
+    const todoToEdit = getTodoByProjectAndTitle(projectName, todoTitle);
+
+    if(!todoToEdit){
+        console.error(`error task ${todoTitle} not found in project ${projectName}`);
+        alert(`error task ${todoTitle} not found`);
+        return;
+    }
+    const taskModalForm = document.getElementById("new-task-form");
+    const taskTitleInput = document.getElementById("task-title");
+    const taskDescriptionInput = document.getElementById("task-description");
+    const taskDueDateInput = document.getElementById("task-due-date");
+    const taskPriorityInput = document.getElementById("task-priority");
+
+    if(taskTitleInput) taskTitleInput.value = todoToEdit.title;
+    if(taskDescriptionInput) taskDescriptionInput.value = todoToEdit.description;
+    if (taskDueDateInput) taskDueDateInput.value = todoToEdit.dueDate;
+    if(taskPriorityInput) taskPriorityInput.value = todoToEdit.priority;
+
+    if(taskModalForm){
+        taskModalForm.dataset.editingProjectName = projectName;
+        taskModalForm.dataset.editingTodoTitle = todoTitle;
+        console.log("debug edit task modal form dataset.editinproject name set to ", taskModalForm.dataset.editingProjectName);
+        console.log("debug edit task modal form dataset.editingtodotitle set to  ", taskModalForm.dataset.editingTodoTitle);
+    } else {
+        console.warn("warn newtask form element not found in dom for setting data");
+    }
+
+    const taskModalTitle = document.getElementById("task-modal-title");
+    if(taskModalTitle) taskModalTitle.textContent = "Edit Task";
+
+    const submitTaskButton = document.getElementById("createTaskBtn");
+    if(submitTaskButton) submitTaskButton.textContent = "Edit Task";
+
+    const taskModalOverlay = document.getElementById("task-modal-overlay");
+    if(taskModalOverlay) {
+        taskModalOverlay.classList.remove("hidden");
+    } else{
+        console.error("tak modal overlay not found to show for edit");
+    }
+
+    
+};
+export {sideBar, projectPage, projectButton, hideProjectModal, showProjectModal, modalProject, setupListeners, modalTask, showTaskModal, hideTaskModal, showTaskModalForEdit};
