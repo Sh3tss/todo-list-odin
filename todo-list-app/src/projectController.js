@@ -77,9 +77,40 @@ const toggleTodoCompletion = (projectName, todoTitle, isComplete) =>{
         console.error(`error project ${projectName} not found or doesn't have tasks to complete`);
         return false;
     }
-}
+};
+const deleteProject = (projectName) => {
+    const initialLenght = allProjects.length;
+    allProjects = allProjects.filter(project => project.name !== projectName);
 
+    if (allProjects.length < initialLenght){
+        saveData(allProjects);
+        console.log(`project ${projectName} deleted with success`);
+        return true;
+    } else {
+        console.error(`error project ${projectName} not found to delete`);
+        return false;
+    }
+};
+const deleteTodo = (projectname,todoTitle) => {
+    const project = getProjectbyName(projectname);
 
+    if(project && project.todos) {
+        const initialLenght = project.todos.length;
+        project.todos = project.todos.filter(todo => todo.title !== todoTitle);
+
+        if(project.todos.length < initialLenght){
+            saveData(allProjects);
+            console.log(`task ${todoTitle} deleted from the project ${projectname}`);
+            return true;
+        }else{
+            console.error(`error task ${todoTitle} not found in the project ${projectName}`);
+            return false;
+        }
+    }else {
+        console.error(`error project ${projectname} not found or doesn't have a task`);
+        return false;
+    }
+};
 const addProject = (projectName, startDate = "", finalDate = "") => {
     const newProject = new Project(projectName, startDate, finalDate);
     allProjects.push(newProject);
@@ -98,4 +129,4 @@ const addTodoToProject = (projectName, title, description, dueDate, priority) =>
         console.error(`Project "${projectName}" not found to add the task`);
     }
 };
-export {allProjects, addProject, addTodoToProject, getProjectbyName, updateProject, getTodoByProjectAndTitle,updateTodo, toggleTodoCompletion};
+export {allProjects, addProject, addTodoToProject, getProjectbyName, updateProject, getTodoByProjectAndTitle,updateTodo, toggleTodoCompletion, deleteProject, deleteTodo};

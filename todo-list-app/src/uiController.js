@@ -1,5 +1,5 @@
 import { addProject } from "./projectController";
-import { allProjects, addTodoToProject,getProjectbyName, updateProject, getTodoByProjectAndTitle, updateTodo,toggleTodoCompletion} from "./projectController";
+import { allProjects, addTodoToProject,getProjectbyName, updateProject, getTodoByProjectAndTitle, updateTodo,toggleTodoCompletion, deleteProject, deleteTodo} from "./projectController";
 
 const sideBar = () => {
     const sideContainer = document.getElementById("sideBar-menu");
@@ -16,24 +16,29 @@ const sideBar = () => {
         //buttons of the sidebar the "menu" part
         const allButton = document.createElement("button");
         allButton.classList.add("menubtn");
-        allButton.textContent = "All Tasks"
+        allButton.textContent = "All Tasks";
+        allButton.dataset.filter = "all";
 
         const weekButton = document.createElement("button");
         weekButton.classList.add("menubtn");
-        weekButton.textContent = "Week Tasks"
+        weekButton.textContent = "Week Tasks";
+        weekButton.dataset.filter = "week";
 
         const montButton = document.createElement("button");
         montButton.classList.add("menubtn");
-        montButton.textContent = "Month Tasks"
+        montButton.textContent = "Month Tasks";
+        montButton.dataset.filter = "month";
 
         const compButton = document.createElement("button");
         compButton.classList.add("menubtn");
-        compButton.textContent = "Completed Tasks"
+        compButton.textContent = "Completed Tasks";
+        compButton.dataset.filter = "complete";
 
         // CORRIGIDO: Criação correta do botão nComButton
         const nComButton = document.createElement("button");
         nComButton.classList.add("menubtn");
-        nComButton.textContent = "Non-Completed Tasks"
+        nComButton.textContent = "Non-Completed Tasks";
+        nComButton.dataset.filter = "non-completed";
 
         //contianer to keep the task pat in side bar
         const taskContainer = document.createElement("div");
@@ -50,6 +55,13 @@ const sideBar = () => {
         sideMenu.appendChild(montButton);
         sideMenu.appendChild(compButton);
         sideMenu.appendChild(nComButton);
+        sideMenu.addEventListener('click', (event) => {
+            if(event.target.classList.contains("menubtn")) {
+                const filterType = event.target.dataset.filter;
+                console.log(`filter button ${filterType} clicked`);
+                displayFilteredTasks(filterType);
+            }
+        });
     } else {
         console.error("Element with ID 'sideBar-menu' not found in the DOM");
     }
@@ -308,6 +320,13 @@ const projectPage = (projects) => {
                         editTaskButton.dataset.projectName = project.name;
                         editTaskButton.dataset.todoTitle = todo.title;
 
+                        const deleteTaskButton = document.createElement("button");
+                        deleteTaskButton.classList.add("delete-task-btn");
+                        deleteTaskButton.textContent = "Delete Task";
+                        deleteTaskButton.dataset.projectName = project.name;
+                        deleteTaskButton.dataset.todoTitle = todo.title;
+
+                        todoItem.appendChild(deleteTaskButton);
                         todoItem.appendChild(editTaskButton);
                         todosList.appendChild(todoItem);
                     });
@@ -328,7 +347,12 @@ const projectPage = (projects) => {
                 editProjectButton.textContent = "Edit Project";
                 editProjectButton.dataset.projectName = project.name;
 
+                const deleteProjectButton = document.createElement("button");
+                deleteProjectButton.classList.add("delete-project-btn");
+                deleteProjectButton.textContent = "Delete Project";
+                deleteProjectButton.dataset.projectName = project.name;
 
+                projectElement.appendChild(deleteProjectButton);
                 projectElement.appendChild(editProjectButton);    
                 projectElement.appendChild(addTaskButton);
                 projectsListContainer.appendChild(projectElement);
@@ -358,6 +382,23 @@ const setupListeners = () => {
         if(!event.target || !event.target.classList){
             console.log("debug clicked on an element without classlist property");
             return;
+        }
+        if(event.target.classList.contains("delete-project-btn")){
+            const projectName = event.target.dataset.projectName;
+            console.log( `Delete project button clicked for the project ${projectName}`);
+            if(confirm(`Sure you want to Delete this Project: ${projectName}`)){
+                deleteProject(projectName);
+                projectPage(allProjects);
+            }
+        }
+        if(event.target.classList.contains("delete-task-btn")){
+            const projectName = event.target.dataset.projectName;
+            const todoTitle = event.target.dataset.todoTitle;
+            console.log(`Delete task button pressed to ${todoTitle}`);
+            if(confirm(`Sure you want to Delete this Task: ${todoTitle}`)){
+                deleteTodo(projectName, todoTitle);
+                projectPage(allProjects);
+            }
         }
         if(event.target.classList.contains("complete-todo-checkbox")) {
             const projectName = event.target.dataset.projectName;
@@ -572,7 +613,106 @@ const showTaskModalForEdit = (projectName, todoTitle) => {
     } else{
         console.error("tak modal overlay not found to show for edit");
     }
-
-    
 };
-export {sideBar, projectPage, projectButton, hideProjectModal, showProjectModal, modalProject, setupListeners, modalTask, showTaskModal, hideTaskModal, showTaskModalForEdit};
+const displayFilteredTasks = (filterType) => {
+    const mainContentArea = document.getElementById("main-content-area");
+    if (!mainContentArea) {
+        console.error("Element with ID 'main-content-area' not found in the DOM.");
+        return;
+    }
+
+    mainContentArea.innerHTML = "";
+
+    const filteredTasksContainer = document.createElement("div");
+    filteredTasksContainer.classList.add("filtered-tasks-container");
+
+    const filterTitle = document.createElement("h2");
+    filterTitle.classList.add("filter-title");
+
+    let tasksToDisplay = [];
+
+    if (filterType === "all") {
+        filterTitle.textContent = "All Tasks";
+        allProjects.forEach(project => {
+            if (project.todos) {
+                tasksToDisplay = tasksToDisplay.concat(project.todos.map(todo => ({ ...todo, projectName: project.name })));
+            }
+        });
+    } else if (filterType === "completed") {
+        filterTitle.textContent = "Completed Tasks";
+        allProjects.forEach(project => {
+            if (project.todos) {
+                tasksToDisplay = tasksToDisplay.concat(project.todos.filter(todo => todo.isComplete).map(todo => ({ ...todo, projectName: project.name })));
+            }
+        });
+    } else if (filterType === "non-completed") {
+        filterTitle.textContent = "Non-Completed Tasks";
+        allProjects.forEach(project => {
+            if (project.todos) {
+                tasksToDisplay = tasksToDisplay.concat(project.todos.filter(todo => !todo.isComplete).map(todo => ({ ...todo, projectName: project.name })));
+            }
+        });
+    } else {
+        filterTitle.textContent = `Tasks (${filterType})`; 
+         allProjects.forEach(project => {
+            if (project.todos) {
+                tasksToDisplay = tasksToDisplay.concat(project.todos.map(todo => ({ ...todo, projectName: project.name })));
+            }
+        });
+    }
+
+    filteredTasksContainer.appendChild(filterTitle);
+
+    if (tasksToDisplay.length > 0) {
+        const tasksList = document.createElement("ul");
+        tasksList.classList.add("filtered-list");
+
+        tasksToDisplay.forEach(todo => {
+            const todoItem = document.createElement("li");
+            todoItem.classList.add("todo-item"); 
+
+          
+            const completeCheckbox = document.createElement("input");
+            completeCheckbox.type = "checkbox";
+            completeCheckbox.classList.add("complete-todo-checkbox");
+            completeCheckbox.checked = todo.isComplete;
+            completeCheckbox.dataset.projectName = todo.projectName; 
+            completeCheckbox.dataset.todoTitle = todo.title;
+            todoItem.appendChild(completeCheckbox);
+
+            const todoTextSpan = document.createElement("span");
+            todoTextSpan.textContent = `${todo.title} (Project: ${todo.projectName}) (Due: ${todo.dueDate || 'No Date'})`;
+            todoItem.appendChild(todoTextSpan);
+
+            if (todo.isComplete) {
+                todoItem.classList.add('completed');
+            }
+
+            const editTaskButton = document.createElement("button");
+            editTaskButton.classList.add("edit-task-btn");
+            editTaskButton.textContent = "Edit"; 
+            editTaskButton.dataset.projectName = todo.projectName;
+            editTaskButton.dataset.todoTitle = todo.title;
+            todoItem.appendChild(editTaskButton);
+
+            const deleteTaskButton = document.createElement("button");
+            deleteTaskButton.classList.add("delete-task-btn");
+            deleteTaskButton.textContent = "Delete"; 
+            deleteTaskButton.dataset.projectName = todo.projectName;
+            deleteTaskButton.dataset.todoTitle = todo.title;
+            todoItem.appendChild(deleteTaskButton);
+
+            tasksList.appendChild(todoItem);
+        });
+        filteredTasksContainer.appendChild(tasksList);
+    } else {
+        const noTasksMessage = document.createElement("p");
+        noTasksMessage.textContent = "No tasks found for this filter.";
+        filteredTasksContainer.appendChild(noTasksMessage);
+    }
+
+    mainContentArea.appendChild(filteredTasksContainer);
+};
+
+
+export {sideBar, projectPage, projectButton, hideProjectModal, showProjectModal, modalProject, setupListeners, modalTask, showTaskModal, hideTaskModal, showTaskModalForEdit, displayFilteredTasks}; 
