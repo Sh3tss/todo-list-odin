@@ -1,5 +1,5 @@
 import { addProject } from "./projectController";
-import { allProjects, addTodoToProject,getProjectbyName, updateProject, getTodoByProjectAndTitle, updateTodo,toggleTodoCompletion, deleteProject, deleteTodo} from "./projectController";
+import { allProjects, addTodoToProject,getProjectbyName, updateProject, getTodoByProjectAndTitle, updateTodo,toggleTodoCompletion, deleteProject, deleteTodo, getFilteredTodos} from "./projectController";
 
 const sideBar = () => {
     const sideContainer = document.getElementById("sideBar-menu");
@@ -32,7 +32,7 @@ const sideBar = () => {
         const compButton = document.createElement("button");
         compButton.classList.add("menubtn");
         compButton.textContent = "Completed Tasks";
-        compButton.dataset.filter = "complete";
+        compButton.dataset.filter = "completed";
 
         // CORRIGIDO: Criação correta do botão nComButton
         const nComButton = document.createElement("button");
@@ -629,37 +629,22 @@ const displayFilteredTasks = (filterType) => {
     const filterTitle = document.createElement("h2");
     filterTitle.classList.add("filter-title");
 
-    let tasksToDisplay = [];
+    const tasksToDisplay = getFilteredTodos(filterType);
 
     if (filterType === "all") {
         filterTitle.textContent = "All Tasks";
-        allProjects.forEach(project => {
-            if (project.todos) {
-                tasksToDisplay = tasksToDisplay.concat(project.todos.map(todo => ({ ...todo, projectName: project.name })));
-            }
-        });
+    } else if (filterType === "week") {
+        filterTitle.textContent = "Week Tasks";
+    } else if (filterType === "month") {
+        filterTitle.textContent = "Month Tasks";
     } else if (filterType === "completed") {
         filterTitle.textContent = "Completed Tasks";
-        allProjects.forEach(project => {
-            if (project.todos) {
-                tasksToDisplay = tasksToDisplay.concat(project.todos.filter(todo => todo.isComplete).map(todo => ({ ...todo, projectName: project.name })));
-            }
-        });
     } else if (filterType === "non-completed") {
         filterTitle.textContent = "Non-Completed Tasks";
-        allProjects.forEach(project => {
-            if (project.todos) {
-                tasksToDisplay = tasksToDisplay.concat(project.todos.filter(todo => !todo.isComplete).map(todo => ({ ...todo, projectName: project.name })));
-            }
-        });
     } else {
         filterTitle.textContent = `Tasks (${filterType})`; 
-         allProjects.forEach(project => {
-            if (project.todos) {
-                tasksToDisplay = tasksToDisplay.concat(project.todos.map(todo => ({ ...todo, projectName: project.name })));
-            }
-        });
     }
+
 
     filteredTasksContainer.appendChild(filterTitle);
 

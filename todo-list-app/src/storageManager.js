@@ -25,7 +25,12 @@ const loadData = () => {
 
         const plainProjects = JSON.parse(projectsJSON);
         const loadedProjects = plainProjects.map(plainProject => {
-            const newProject = new Project(plainProject.name);
+            const newProject = new Project(
+                plainProject.name,
+                plainProject.startDate,
+                plainProject.finalDate
+
+            );
 
             newProject.todos = plainProject.todos.map(plainTodo => {
                 const newTodo = new Todo(

@@ -1,6 +1,7 @@
 import { Todo } from "./todo";
 import { Project } from "./project";
 import { saveData, loadData } from "./storageManager";
+import { projectButton } from "./uiController";
 
 let allProjects = loadData();
 
@@ -129,4 +130,57 @@ const addTodoToProject = (projectName, title, description, dueDate, priority) =>
         console.error(`Project "${projectName}" not found to add the task`);
     }
 };
-export {allProjects, addProject, addTodoToProject, getProjectbyName, updateProject, getTodoByProjectAndTitle,updateTodo, toggleTodoCompletion, deleteProject, deleteTodo};
+const getAllTodos = () => {
+    let allTodos = [];
+    allProjects.forEach(project => {
+        if(project.todos && project.todos.length > 0){
+            allTodos = allTodos.concat(project.todos.map(todo => ({...todo, projectname: project.name})));
+        }
+    });
+    return allTodos;
+};
+const getFilteredTodos = (filterType) => {
+    const today = new Date();
+    today.setHours(0,0,0,0);
+    let tasks = getAllTodos();
+    switch(filterType){
+        case "all":
+            return tasks;
+        case "week":
+            const startOfWeek = new Date(today);
+            startOfWeek.setDate(today.getDate() - today.getDate());
+            startOfWeek.setHours(0,0,0,0);
+
+            const endOfWeek = new Date(startOfWeek);
+            endOfWeek.setDate(startOfWeek.getDate() + 6);
+            endOfWeek.setHours(23,59,59,999);
+
+            return tasks.filter(todo =>{
+                if (!todo.dueDate) return false;
+                const dueDate = new Date(todo.dueDate + 'T00:00:00');
+                dueDate.setHours(0,0,0,0);
+                return dueDate >= startOfWeek && dueDate <= endOfWeek && !todo.isComplete;
+            });
+        case "month":
+          const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+            startOfMonth.setHours(0, 0, 0, 0);
+
+            const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+            endOfMonth.setHours(23, 59, 59, 999);
+
+            return tasks.filter(todo => {
+                if (!todo.dueDate) return false;
+                const dueDate = new Date(todo.dueDate + 'T00:00:00'); 
+                dueDate.setHours(0, 0, 0, 0);
+                return dueDate >= startOfMonth && dueDate <= endOfMonth && !todo.isComplete;
+            }); 
+        case "completed":
+            return tasks.filter(todo => todo.isComplete === true);
+        case "non-completed":
+            return tasks.filter(todo => todo.isComplete === false);
+        default:
+            console.warn(`Unknown filter type: ${filterType}. Returning all tasks.`);
+            return tasks; 
+    }
+}
+export {allProjects, addProject, addTodoToProject, getProjectbyName, updateProject, getTodoByProjectAndTitle,updateTodo, toggleTodoCompletion, deleteProject, deleteTodo, getFilteredTodos};
